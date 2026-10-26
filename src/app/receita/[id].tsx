@@ -1,12 +1,7 @@
-import {
-  View,
-  Text,
-  Image,
-  ScrollView,
-  StyleSheet,
-} from "react-native";
+import {View, Text, Image, ScrollView, StyleSheet, } from "react-native";
 
 export default function Receita() {
+  
   return (
     <ScrollView style={styles.container}>
       <View style={styles.logoContainer}>
@@ -22,9 +17,7 @@ export default function Receita() {
           Tempo de preparo 60 minutos
         </Text>
 
-        <Image
-          style={styles.imagem}
-          resizeMode="cover"
+        <Image style={styles.imagem} resizeMode="cover"
         />
 
         <View style={styles.linha} />

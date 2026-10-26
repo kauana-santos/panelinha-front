@@ -1,8 +1,40 @@
 
-import { Link } from "expo-router";
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useRouter } from "expo-router";
+import { useQuery } from "@tanstack/react-query";
+import {Image, ScrollView, StyleSheet, Text, TouchableOpacity, View,} from "react-native";
+import { searchRecipes } from "@/api/get-receitas";
+
+interface Receita {
+  id: number;
+  titulo: string;
+  descricao: string;
+  imageUrl: string;
+}
 
 export default function Receitas() {
+  const router = useRouter();
+
+  const { data, isLoading, isError } = useQuery<Receita[]>({
+    queryKey: ["recipes"],
+    queryFn: searchRecipes,
+  });
+
+  if (isLoading) {
+    return (
+      <View style={styles.mensagem}>
+        <Text>Carregando receitas...</Text>
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View style={styles.mensagem}>
+        <Text>Ops! Erro ao carregar receitas!</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -17,24 +49,40 @@ export default function Receitas() {
         <View style={styles.containerTitulo}>
           <Text style={styles.texto}>Receitas</Text>
         </View>
-          <TouchableOpacity style={styles.containerReceita}>
+
+        {data?.map((receita) => (
+          <TouchableOpacity
+            key={receita.id}
+            style={styles.containerReceita}
+            onPress={() =>
+              router.push({
+                pathname: "/receita/[id]",
+                params: { id: receita.id.toString() },
+              })
+            }>
             <Image
-              source={{
-                uri: "https://static.itdg.com.br/images/640-400/d290bc79bcad112ee9095604e45eb262/365326-original.jpg",
-              }}
+              source={{ uri: receita.imageUrl }}
               style={styles.imagemReceita}
               resizeMode="cover"
             />
+
             <View style={styles.infoReceita}>
               <Text style={styles.nomeReceita}>
-                Manjar de coco com frutas vermelhas
+                {receita.titulo}
               </Text>
+
               <Text style={styles.descricao}>
-                Esse manjar de coco ganha um contraste especial com a calda de
-                frutas vermelhas.
+                {receita.descricao}
               </Text>
             </View>
           </TouchableOpacity>
+        ))}
+
+        {data?.length === 0 && (
+          <Text style={styles.descricao}>
+            Nenhuma receita encontrada.
+          </Text>
+        )}
       </ScrollView>
     </View>
   );
@@ -44,6 +92,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F5F5F5",
+  },
+
+  mensagem: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   header: {
