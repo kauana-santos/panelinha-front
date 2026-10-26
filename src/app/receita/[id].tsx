@@ -1,73 +1,128 @@
+import { searchRecipe } from "@/api/get-receita";
+import { useQuery } from "@tanstack/react-query";
+import { useLocalSearchParams } from "expo-router";
 import {View, Text, Image, ScrollView, StyleSheet, } from "react-native";
+interface Ingrediente {
+  id: number;
+  titulo: string;
+  descricao?: string;
+  quantidade: number;
+}
+
+interface ModoDePreparo {
+  id: number;
+  titulo: string;
+  descricao: string;
+}
+interface ReceitaDados {
+  id: number;
+  titulo: string;
+  descricao: string;
+  imageUrl: string;
+  ingredientes: Ingrediente[] | null;
+  modoDePreparo: ModoDePreparo[] | null;
+}
 
 export default function Receita() {
-  
+  const { id } = useLocalSearchParams<{ id: string }>();
+
+  const { data, isLoading, isError } = useQuery<ReceitaDados>({
+    queryKey: ["receita", id],
+    queryFn: () => searchRecipe(id),
+    enabled: !!id,
+  });
+
+  if (isLoading) {
+    return (
+      <View style={styles.mensagemContainer}>
+        <Text>Carregando receita...</Text>
+      </View>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <View style={styles.mensagemContainer}>
+        <Text>Não foi possível carregar a receita.</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.logoContainer}>
-        <Text style={styles.logo}>🍲</Text>
+      <View style={styles.header}>
+        <Image
+          source={require("@/assets/images/logo.png")}
+          style={styles.logo}
+          resizeMode="contain"
+        />
       </View>
 
       <View style={styles.conteudo}>
-        <Text style={styles.titulo}>
-          Manjar de coco com frutas vermelhas
-        </Text>
+        <Text style={styles.titulo}>{data.titulo}</Text>
 
-        <Text style={styles.tempo}>
-          Tempo de preparo 60 minutos
-        </Text>
+        <Text style={styles.descricao}>{data.descricao}</Text>
 
-        <Image style={styles.imagem} resizeMode="cover"
-        />
+        {data.imageUrl ? (
+          <Image
+            source={{ uri: data.imageUrl }}
+            style={styles.imagem}
+            resizeMode="cover"
+          />
+        ) : (
+          <Text style={styles.mensagemPreparo}>
+            Imagem não disponível.
+          </Text>
+        )}
 
         <View style={styles.linha} />
 
-        <View style={styles.cardIngredientes}>
-          <Text style={styles.subtitulo}>
-            Ingredientes da calda
-          </Text>
+        <View style={styles.card}>
+          <Text style={styles.subtitulo}>Ingredientes</Text>
 
-          <ScrollView
-            style={styles.listaIngredientes}
-            nestedScrollEnabled
-            showsVerticalScrollIndicator
-          >
-            <Text style={styles.ingrediente}>
-              300 gramas de frutas vermelhas variadas
-            </Text>
+          {data.ingredientes && data.ingredientes.length > 0 ? (
+            data.ingredientes.map((ingrediente) => (
+              <View key={ingrediente.id} style={styles.item}>
+                <Text style={styles.ingrediente}>
+                  • {ingrediente.quantidade} {ingrediente.titulo}
+                </Text>
 
-            <Text style={styles.ingrediente}>
-              1/2 xícara de chá de açúcar refinado (100 gramas)
+                {ingrediente.descricao ? (
+                  <Text style={styles.descricaoIngrediente}>
+                    {ingrediente.descricao}
+                  </Text>
+                ) : null}
+              </View>
+            ))
+          ) : (
+            <Text style={styles.mensagemPreparo}>
+              Os ingredientes ainda não estão disponíveis.
             </Text>
+          )}
+        </View>
 
-            <Text style={styles.ingrediente}>
-              Suco de 1 limão (15 ml)
-            </Text>
+        <View style={styles.card}>
+          <Text style={styles.subtitulo}>Modo de preparo</Text>
 
-            <Text style={styles.ingrediente}>
-              Raspas de 1 limão
-            </Text>
+          {data.modoDePreparo && data.modoDePreparo.length > 0 ? (
+            data.modoDePreparo.map((etapa, index) => (
+              <View key={etapa.id} style={styles.etapaContainer}>
+                <Text style={styles.etapaTitulo}>
+                  {index + 1}. {etapa.titulo}
+                </Text>
 
-            <Text style={styles.subtitulo}>
-              Ingredientes da calda
+                {etapa.descricao ? (
+                  <Text style={styles.etapa}>
+                    {etapa.descricao}
+                  </Text>
+                ) : null}
+              </View>
+            ))
+          ) : (
+            <Text style={styles.mensagemPreparo}>
+              O modo de preparo ainda não está disponível.
             </Text>
-
-            <Text style={styles.ingrediente}>
-              300 gramas de frutas vermelhas variadas
-            </Text>
-
-            <Text style={styles.ingrediente}>
-              1/2 xícara de chá de açúcar refinado (100 gramas)
-            </Text>
-
-            <Text style={styles.ingrediente}>
-              Suco de 1 limão (15 ml)
-            </Text>
-
-            <Text style={styles.ingrediente}>
-              Raspas de 1 limão
-            </Text>
-          </ScrollView>
+          )}
         </View>
       </View>
     </ScrollView>
@@ -77,75 +132,99 @@ export default function Receita() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FFFDF4",
   },
-
-  logoContainer: {
-    height: 76,
-    backgroundColor: "#FFF5B5",
+  header: {
+    height: 70,
+    backgroundColor: "#FAF2B7",
     justifyContent: "center",
     alignItems: "center",
   },
-
   logo: {
-    fontSize: 36,
+    width: 55,
+    height: 55,
   },
-
   conteudo: {
-    paddingHorizontal: 12,
-    paddingTop: 65,
+    padding: 20,
   },
-
   titulo: {
-    color: "#E85B16",
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#60452A",
+    marginBottom: 10,
+  },
+  descricao: {
     fontSize: 16,
-    textAlign: "center",
-    marginHorizontal: 20,
-  },
-
-  tempo: {
-    color: "#666666",
-    fontSize: 12,
-    textAlign: "center",
-    marginTop: 6,
-    marginBottom: 32,
-  },
-
-  imagem: {
-    width: "82%",
-    height: 217,
-    alignSelf: "center",
-  },
-
-  linha: {
-    height: 1,
-    backgroundColor: "#EEEEEE",
-    marginTop: 13,
-    marginBottom: 28,
-    marginHorizontal: 27,
-  },
-
-  cardIngredientes: {
-    backgroundColor: "#FAF8F8",
-    borderRadius: 12,
-    padding: 16,
-    minHeight: 380,
-  },
-
-  subtitulo: {
-    fontSize: 15,
-    color: "#222222",
-    marginBottom: 14,
-  },
-
-  listaIngredientes: {
-    maxHeight: 300,
-  },
-
-  ingrediente: {
-    fontSize: 11,
-    color: "#222222",
+    color: "#555",
+    lineHeight: 23,
     marginBottom: 12,
+  },
+  tempo: {
+    fontSize: 14,
+    color: "#777",
+    marginBottom: 16,
+  },
+  imagem: {
+    width: "100%",
+    height: 220,
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  linha: {
+    height: 2,
+    backgroundColor: "#E8D98A",
+    marginBottom: 20,
+  },
+  card: {
+    backgroundColor: "#FFFFFF",
+    padding: 18,
+    borderRadius: 12,
+    marginBottom: 20,
+    elevation: 2,
+  },
+  subtitulo: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#60452A",
+    marginBottom: 16,
+  },
+  item: {
+    marginBottom: 12,
+  },
+  ingrediente: {
+    fontSize: 16,
+    color: "#333",
+  },
+  descricaoIngrediente: {
+    fontSize: 13,
+    color: "#666",
     marginLeft: 14,
+    marginTop: 4,
+    lineHeight: 20,
+  },
+  etapaContainer: {
+    marginBottom: 16,
+  },
+  etapaTitulo: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#60452A",
+    marginBottom: 6,
+  },
+  etapa: {
+    fontSize: 15,
+    color: "#444",
+    lineHeight: 23,
+  },
+  mensagemPreparo: {
+    fontSize: 14,
+    color: "#777",
+    marginBottom: 12,
+  },
+  mensagemContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
   },
 });
