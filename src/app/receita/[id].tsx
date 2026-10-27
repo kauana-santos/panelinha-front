@@ -1,4 +1,7 @@
 import { searchRecipe } from "@/api/get-receita";
+import Erro from "@/components/estados/Error";
+import Loading from "@/components/estados/Loading";
+import Header from "@/components/Header";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import {View, Text, Image, ScrollView, StyleSheet, } from "react-native";
@@ -32,31 +35,21 @@ export default function Receita() {
     enabled: !!id,
   });
 
-  if (isLoading) {
-    return (
-      <View style={styles.mensagemContainer}>
-        <Text>Carregando receita...</Text>
-      </View>
-    );
-  }
+   if (isLoading) {
+     return (
+       <Loading/>
+     );
+   }
 
   if (isError || !data) {
     return (
-      <View style={styles.mensagemContainer}>
-        <Text>Não foi possível carregar a receita.</Text>
-      </View>
+      <Erro/>
     );
   }
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Image
-          source={require("@/assets/images/logo.png")}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
+      <Header/>
 
       <View style={styles.conteudo}>
         <Text style={styles.titulo}>{data.titulo}</Text>

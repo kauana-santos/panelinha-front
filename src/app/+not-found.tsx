@@ -1,17 +1,12 @@
 
+import Header from "@/components/Header";
 import { Link } from "expo-router";
 import { Image, StyleSheet, Text, View } from "react-native";
 
 export default function NotFound() {
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Image
-          source={require("@/assets/images/logo.png")}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
+      <Header/>
 
       <View style={styles.conteudo}>
         <View style={styles.tituloContainer}>

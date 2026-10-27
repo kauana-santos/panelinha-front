@@ -3,6 +3,9 @@ import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import {Image, ScrollView, StyleSheet, Text, TouchableOpacity, View,} from "react-native";
 import { searchRecipes } from "@/api/get-receitas";
+import Header from "@/components/Header";
+import Loading from "@/components/estados/Loading";
+import Erro from "@/components/estados/Error";
 
 interface Receita {
   id: number;
@@ -21,29 +24,19 @@ export default function Receitas() {
 
   if (isLoading) {
     return (
-      <View style={styles.mensagem}>
-        <Text>Carregando receitas...</Text>
-      </View>
+      <Loading/>
     );
   }
 
   if (isError) {
     return (
-      <View style={styles.mensagem}>
-        <Text>Ops! Erro ao carregar receitas!</Text>
-      </View>
+      <Erro/>
     );
   }
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Image
-          source={require("@/assets/images/logo.png")}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
+      <Header/>
 
       <ScrollView contentContainerStyle={styles.conteudo}>
         <View style={styles.containerTitulo}>
@@ -93,26 +86,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F5F5F5",
   },
-
   mensagem: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-
-  header: {
-    height: 70,
-    width: "100%",
-    backgroundColor: "#FAF2B7",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  logo: {
-    width: 55,
-    height: 55,
-  },
-
   conteudo: {
     padding: 15,
   },
