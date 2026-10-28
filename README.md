@@ -1,4 +1,4 @@
-# 🍳 Panelinha Mobile
+#  Panelinha Mobile
 
 O **Panelinha** é um aplicativo mobile desenvolvido com React Native e Expo, criado para facilitar o acesso a receitas culinárias. Com uma interface simples e intuitiva, o usuário pode visualizar uma lista de receitas e acessar seus detalhes, incluindo ingredientes e modo de preparo.
 
